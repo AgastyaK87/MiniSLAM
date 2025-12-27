@@ -4,23 +4,22 @@
 #include <string>
 #include <fstream>
 
-namespace minislam{
+namespace minislam {
 
-class Dataset{
+class Dataset {
 public:
     Dataset(const std::string& dataset_path);
-
-    //Returns nullptr if sequence ends
+    
+    // Get the next frame from the sequence
     Frame::Ptr nextFrame();
 
-    //Helper to parse the 12 number line into a 4x4 matrix
-
-    static Eigen::Matrix4d readPose(const std::string& line){
+    // Helper to read the KITTI pose format (12 numbers)
+    // 12 numbers = flattened 3x4 matrix (Row 1, Row 2, Row 3)
+    static Eigen::Matrix4d readPose(std::string line) {
         std::stringstream ss(line);
         Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
-        //Fill in top 3x4 block;
-        for(int i = 0; i < 3; i++){
-            for(int j = 0; j < 4; j++){
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 4; j++) {
                 ss >> T(i, j);
             }
         }
@@ -30,7 +29,7 @@ public:
 private:
     std::string path_;
     int current_image_index_;
-    std::vector<Eigen::Matrix4d> poses_;   
-}
-    
+    std::vector<Eigen::Matrix4d> poses_;
+};
+
 }

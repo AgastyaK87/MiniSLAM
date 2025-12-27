@@ -1,18 +1,14 @@
 #include "minislam/dataset.h"
-#include <iostream>
-#include <iomanip>
 
 namespace minislam {
 
 Dataset::Dataset(const std::string& dataset_path) 
     : path_(dataset_path), current_image_index_(0) {
     
-    // 1. Load Poses
-    std::string pose_file = path_ + "/poses/00.txt";
-    std::ifstream fin(pose_file);
+    // 1. Load Ground Truth Poses
+    std::ifstream fin(path_ + "/poses/00.txt");
     if (!fin) { 
-        std::cerr << "ERROR: Cannot find poses at " << pose_file << std::endl; 
-        std::cerr << "Did you symlink the datasets folder correctly?" << std::endl;
+        std::cerr << "Cannot find poses file at " << path_ << "/poses/00.txt" << std::endl; 
         return; 
     }
 
@@ -23,20 +19,18 @@ Dataset::Dataset(const std::string& dataset_path)
             poses_.push_back(readPose(line));
         }
     }
-    std::cout << "Loaded " << poses_.size() << " poses." << std::endl;
 }
 
 Frame::Ptr Dataset::nextFrame() {
-    // Generate filename: 000000.png, 000001.png...
-    // Using stringstream for formatting (safer than sprintf)
-    std::stringstream ss;
-    ss << std::setw(6) << std::setfill('0') << current_image_index_;
-    std::string image_file = path_ + "/sequences/00/image_0/" + ss.str() + ".png";
+    // Generate file name: 000000.png, 000001.png...
+    char buf[20];
+    sprintf(buf, "%06d.png", current_image_index_);
+    std::string image_file = path_ + "/sequences/00/image_0/" + std::string(buf);
 
     cv::Mat image = cv::imread(image_file, cv::IMREAD_GRAYSCALE);
     if (image.data == nullptr) return nullptr; // End of sequence
 
-    // Get Pose
+    // Get the ground truth pose for this frame
     Eigen::Matrix4d pose = Eigen::Matrix4d::Identity();
     if (current_image_index_ < poses_.size()) {
         pose = poses_[current_image_index_];

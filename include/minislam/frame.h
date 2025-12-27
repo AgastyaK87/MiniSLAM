@@ -1,25 +1,26 @@
 #pragma once
-#include <memory>
-#include <Eigen/Dense>
+#include "minislam/camera.h"
 #include <opencv2/opencv.hpp>
 
-namespace minislam{
+namespace minislam {
 
-    struct Frame{
-        typedef std::shared_ptr<Frame> Ptr;
-        unsigned long id_; // 0,1,2
-        double time_stamp_; //timestamp
-        cv::Mat image; //grayscale image
-        Eigen::Matrix4d pose_; //T_wc (camera to world)
-
-        Frame(long id, const cv::Mat& img, const Eigen::Matrix4d& pose = Eigen::Matrix4d::Identity())
-        : id_(id), image(img), pose_(pose){}
-        
-        // Helper: Get the exact position (x,y,z) in World
-        Eigen::Vector3d getPosition() const {
-            return pose_.block<3, 1>(0, 3); // Top-right 3x1 block
-        }
-        
-    };
+struct Frame {
+    typedef std::shared_ptr<Frame> Ptr;
+    
+    unsigned long id_;           // Frame ID (0, 1, 2...)
+    double time_stamp_;          // Time (if available)
+    cv::Mat image_;              // Grayscale image
+    Eigen::Matrix4d pose_;       // Ground Truth Pose (T_wc: Camera to World)
+    
+    // We will store features here in future lessons
+    
+    Frame(long id, const cv::Mat& img, const Eigen::Matrix4d& pose = Eigen::Matrix4d::Identity())
+        : id_(id), image_(img), pose_(pose) {}
+    
+    Eigen::Vector3d getPosition(){
+        // Extracts the translation vector (top-right 3x1 block)
+        return pose_.block<3, 1>(0, 3);
+    }
+};
 
 }

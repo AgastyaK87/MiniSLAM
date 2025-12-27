@@ -24,6 +24,7 @@ include_directories(include)
 # This holds all our math/logic (camera, optimization, etc.)
 add_library(minislam_core
     src/camera.cpp
+    src/dataset.cpp
 )
 
 # Link dependencies to our library
